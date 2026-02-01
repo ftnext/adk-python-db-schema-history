@@ -13,6 +13,8 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
    - Example: `docker run --name adk-pg -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres:18`
 2. Start the ADK API server for the target version.
    - Note: ADK expects a PostgreSQL driver; use `psycopg` and `greenlet`.
+   - Run from the `my_agent/` directory.
+   - If port 8000 is already in use, stop the existing API server first.
    - Example:
      - `uvx --from google-adk==1.22.0 --with psycopg --with greenlet adk api_server --session_service_uri postgresql+psycopg://postgres:mysecretpassword@localhost:5432/postgres`
 3. Create a session by sending the required POST request to the API server.
@@ -27,6 +29,7 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
    - Example: `python scripts/strip_pg_dump.py v<version>`
 7. Save each cleaned output as `v<version>/<table>.sql`.
 8. Before switching ADK versions, stop the API server and reset the database to avoid cross-version contamination.
+   - Example: `docker rm -f adk-pg`
 
 ## Notes
 - Keep the list of tracked versions in README.md up to date.
