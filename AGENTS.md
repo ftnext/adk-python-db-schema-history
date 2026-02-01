@@ -19,11 +19,14 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
    - Endpoint: `POST /apps/my_agent/users/test_user/sessions`
    - Example:
      - `curl -X POST http://127.0.0.1:8000/apps/my_agent/users/test_user/sessions -H 'Content-Type: application/json' -d '{}'`
+   - If it fails immediately after startup, wait a few seconds and retry.
 4. List the created tables in PostgreSQL.
 5. For each table, export its CREATE TABLE SQL:
-   - Use `pg_dump --schema-only --table <schema>.<table> postgresql://postgres:mysecretpassword@localhost:5432/postgres`
-6. Save each output as `v<version>/<table>.sql`.
-7. Before switching ADK versions, stop the API server and reset the database to avoid cross-version contamination.
+   - Use `docker exec -i adk-pg pg_dump --schema-only --table <schema>.<table> postgresql://postgres:mysecretpassword@localhost:5432/postgres`
+6. Strip pg_dump boilerplate (e.g., `SET ...`, `--` headers, and `\restrict/\unrestrict`) so only CREATE/ALTER statements remain.
+   - Example: `python scripts/strip_pg_dump.py v<version>`
+7. Save each cleaned output as `v<version>/<table>.sql`.
+8. Before switching ADK versions, stop the API server and reset the database to avoid cross-version contamination.
 
 ## Notes
 - Keep the list of tracked versions in README.md up to date.
