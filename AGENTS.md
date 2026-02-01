@@ -27,5 +27,10 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
 5. Before switching ADK versions, stop the API server and reset the database to avoid cross-version contamination.
    - Example: `docker rm -f adk-pg`
 
+## Scripted workflow (recommended)
+- Use `scripts/export_schema.sh <version>` to run the steps above in one command.
+- Example: `scripts/export_schema.sh 1.22.0`
+- Logs are saved to `/tmp/adk_api_<version>.log` when troubleshooting startup issues.
+
 ## Notes
 - Keep the list of tracked versions in README.md up to date.
