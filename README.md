@@ -3,10 +3,13 @@ This repository visualizes the historical evolution of the Python ADK database t
 It is intended to help teams track when and how tables changed across releases. 
 The current focus includes the following versions, and this list will be updated as new findings emerge.
 
-- 1.14.0
-- 1.17.0
-- 1.19.0
-- 1.22.0
+- [1.14.0](https://github.com/google/adk-python/releases/tag/v1.14.0)
+    - >NOTE: This requires DB migration, run `ALTER TABLE events ADD COLUMN custom_metadata JSON;` to migrate existing database tables.
+- [1.17.0](https://github.com/google/adk-python/releases/tag/v1.17.0)
+- [1.19.0](https://github.com/google/adk-python/releases/tag/v1.19.0)
+    - >Add transcription fields to session events
+- [1.22.0](https://github.com/google/adk-python/releases/tag/v1.22.0)
+    - >Introduce new JSON-based database schema for DatabaseSessionService, which will be used for newly-created databases. A migration command and script are provided.
 
 Each snapshot captures the table definitions for a specific version so differences can be compared over time. 
 By keeping an explicit timeline of schema shifts, the repository reduces surprises during upgrades and investigations.
