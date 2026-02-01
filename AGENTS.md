@@ -6,7 +6,7 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
 - Use `uvx --from google-adk==<version> adk ...` to run ADK.
 - PostgreSQL runs via Docker image `postgres:18`.
 - DB connection string: `postgresql+psycopg://postgres:mysecretpassword@localhost:5432/postgres`.
-- Output is stored under `v<version>/` directories (e.g., `v1.22.0/`), one `<table>.sql` file per table.
+- Output is stored under `v<version>/` directories (e.g., `v1.22.0/`) as `schema.sql` exported by `psqldef`.
 
 ## Procedure
 1. Start PostgreSQL 18:
@@ -22,13 +22,9 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
    - Example:
      - `curl -X POST http://127.0.0.1:8000/apps/my_agent/users/test_user/sessions -H 'Content-Type: application/json' -d '{}'`
    - If it fails immediately after startup, wait a few seconds and retry.
-4. List the created tables in PostgreSQL.
-5. For each table, export its CREATE TABLE SQL:
-   - Use `docker exec -i adk-pg pg_dump --schema-only --table <schema>.<table> postgresql://postgres:mysecretpassword@localhost:5432/postgres`
-6. Strip pg_dump boilerplate (e.g., `SET ...`, `--` headers, and `\restrict/\unrestrict`) so only CREATE/ALTER statements remain.
-   - Example: `python scripts/strip_pg_dump.py v<version>`
-7. Save each cleaned output as `v<version>/<table>.sql`.
-8. Before switching ADK versions, stop the API server and reset the database to avoid cross-version contamination.
+4. Export the full schema with `psqldef` and save it under the version directory:
+   - Example: `psqldef -h localhost -p 5432 -U postgres -W mysecretpassword postgres --export > v<version>/schema.sql`
+5. Before switching ADK versions, stop the API server and reset the database to avoid cross-version contamination.
    - Example: `docker rm -f adk-pg`
 
 ## Notes
