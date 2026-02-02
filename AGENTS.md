@@ -54,11 +54,11 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
      - `lsof -ti :8000` then `kill <pid>`
 
 ## Scripted workflow (recommended)
-- Use `scripts/export_schema.sh <version> [postgresql|mysql|all]` to run the steps above.
+- Use `scripts/export_schema.sh <version> [postgresql|mysql]` to run the steps above.
 - Examples:
   - `scripts/export_schema.sh 1.22.0 postgresql`
   - `scripts/export_schema.sh 1.22.0 mysql`
-  - `scripts/export_schema.sh 1.22.0 all`
+- Run PostgreSQL and MySQL exports separately to avoid API port conflicts.
 - Logs are saved to `/tmp/adk_api_<version>_<db>.log` when troubleshooting startup issues.
 
 ## Notes

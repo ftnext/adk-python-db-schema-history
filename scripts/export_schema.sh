@@ -4,7 +4,7 @@ set -euo pipefail
 version="${1:-}"
 db="${2:-postgresql}"
 if [ -z "$version" ]; then
-  echo "Usage: $0 <version> [postgresql|mysql|all]" >&2
+  echo "Usage: $0 <version> [postgresql|mysql]" >&2
   exit 2
 fi
 
@@ -126,10 +126,6 @@ run_one() {
 }
 
 case "$db" in
-  all)
-    run_one postgresql
-    run_one mysql
-    ;;
   postgres)
     run_one postgresql
     ;;
@@ -137,7 +133,7 @@ case "$db" in
     run_one "$db"
     ;;
   *)
-    echo "Usage: $0 <version> [postgresql|mysql|all]" >&2
+    echo "Usage: $0 <version> [postgresql|mysql]" >&2
     exit 2
     ;;
 esac
