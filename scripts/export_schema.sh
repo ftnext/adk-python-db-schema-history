@@ -17,7 +17,17 @@ version_ge() {
 
 cleanup() {
   if [ -n "$current_pidfile" ] && [ -f "$current_pidfile" ]; then
-    kill "$(cat "$current_pidfile")" >/dev/null 2>&1 || true
+    api_pid="$(cat "$current_pidfile")"
+    kill "$api_pid" >/dev/null 2>&1 || true
+    for _ in {1..10}; do
+      if ! lsof -ti :8000 >/dev/null 2>&1; then
+        break
+      fi
+      sleep 1
+    done
+    if lsof -ti :8000 >/dev/null 2>&1; then
+      kill -9 "$api_pid" >/dev/null 2>&1 || true
+    fi
   fi
   if [ -n "$current_container" ]; then
     docker rm -f "$current_container" >/dev/null 2>&1 || true
