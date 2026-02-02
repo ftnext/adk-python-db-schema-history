@@ -11,7 +11,8 @@ The current focus includes the following versions, and this list will be updated
 - [1.22.0](https://github.com/google/adk-python/releases/tag/v1.22.0)
     - >Introduce new JSON-based database schema for DatabaseSessionService, which will be used for newly-created databases. A migration command and script are provided.
 
-Each snapshot captures the table definitions for a specific version so differences can be compared over time. 
+Each snapshot captures the table definitions for a specific version so differences can be compared over time.
+Schemas are stored under `schemas/v<version>/` as `postgresql.sql` and `mysql.sql`.
 By keeping an explicit timeline of schema shifts, the repository reduces surprises during upgrades and investigations.
 
 ## Example
@@ -33,7 +34,27 @@ curl -X POST http://127.0.0.1:8000/apps/my_agent/users/test_user/sessions -H 'Co
 ```
 
 ```bash
-psqldef -h localhost -p 5432 -U postgres -W mysecretpassword --dry-run postgres < v1.17.0/schema.sql
+psqldef -h localhost -p 5432 -U postgres -W mysecretpassword --dry-run postgres < schemas/v1.17.0/postgresql.sql
+```
+
+With `mysqldef`
+
+```bash
+docker run --name adk-mysql -e MYSQL_ROOT_PASSWORD=mysecretpassword -p 3306:3306 -d mysql:9
+```
+
+```bash
+uvx --from google-adk==1.14.0 --with pymysql adk api_server --session_service_uri mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/mysql
+```
+
+Create session to initialize the database:
+
+```bash
+curl -X POST http://127.0.0.1:8000/apps/my_agent/users/test_user/sessions -H 'Content-Type: application/json' -d '{}'
+```
+
+```bash
+MYSQL_PWD=mysecretpassword mysqldef -h 127.0.0.1 -P 3306 -u root mysql --dry-run < schemas/v1.17.0/mysql.sql
 ```
 
 v1.14.0 -> v1.17.0

@@ -5,32 +5,49 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
 ## Assumptions
 - Use `uvx --from google-adk==<version> adk ...` to run ADK.
 - PostgreSQL runs via Docker image `postgres:18`.
-- DB connection string: `postgresql+psycopg://postgres:mysecretpassword@localhost:5432/postgres`.
-- Output is stored under `v<version>/` directories (e.g., `v1.22.0/`) as `schema.sql` exported by `psqldef`.
+- MySQL runs via Docker image `mysql:9`.
+- DB connection strings:
+  - PostgreSQL: `postgresql+psycopg://postgres:mysecretpassword@localhost:5432/postgres`.
+  - MySQL: `mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/mysql`.
+- Output is stored under `schemas/v<version>/` as:
+  - `postgresql.sql` exported by `psqldef`
+  - `mysql.sql` exported by `mysqldef`
 
 ## Procedure
-1. Start PostgreSQL 18:
-   - Example: `docker run --name adk-pg -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres:18`
+1. Start the database container.
+   - PostgreSQL 18:
+     - `docker run --name adk-pg -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres:18`
+   - MySQL 9:
+     - `docker run --name adk-mysql -e MYSQL_ROOT_PASSWORD=mysecretpassword -p 3306:3306 -d mysql:9`
 2. Start the ADK API server for the target version.
-   - Note: ADK expects a PostgreSQL driver; use `psycopg` and `greenlet`.
    - Run from the `my_agent/` directory.
    - If port 8000 is already in use, stop the existing API server first.
-   - Example:
+   - PostgreSQL example:
      - `uvx --from google-adk==1.22.0 --with psycopg --with greenlet adk api_server --session_service_uri postgresql+psycopg://postgres:mysecretpassword@localhost:5432/postgres`
+   - MySQL example:
+     - `uvx --from google-adk==1.22.0 --with pymysql adk api_server --session_service_uri mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/mysql`
 3. Create a session by sending the required POST request to the API server.
    - Endpoint: `POST /apps/my_agent/users/test_user/sessions`
    - Example:
      - `curl -X POST http://127.0.0.1:8000/apps/my_agent/users/test_user/sessions -H 'Content-Type: application/json' -d '{}'`
    - If it fails immediately after startup, wait a few seconds and retry.
-4. Export the full schema with `psqldef` and save it under the version directory:
-   - Example: `psqldef -h localhost -p 5432 -U postgres -W mysecretpassword postgres --export > v<version>/schema.sql`
+4. Export the full schema with `sqldef` and save it under the version directory:
+   - PostgreSQL example:
+     - `psqldef -h localhost -p 5432 -U postgres -W mysecretpassword postgres --export > schemas/v<version>/postgresql.sql`
+   - MySQL example:
+     - `MYSQL_PWD=mysecretpassword mysqldef -h 127.0.0.1 -P 3306 -u root mysql --export > schemas/v<version>/mysql.sql`
 5. Before switching ADK versions, stop the API server and reset the database to avoid cross-version contamination.
-   - Example: `docker rm -f adk-pg`
+   - Examples:
+     - `docker rm -f adk-pg`
+     - `docker rm -f adk-mysql`
 
 ## Scripted workflow (recommended)
-- Use `scripts/export_schema.sh <version>` to run the steps above in one command.
-- Example: `scripts/export_schema.sh 1.22.0`
-- Logs are saved to `/tmp/adk_api_<version>.log` when troubleshooting startup issues.
+- Use `scripts/export_schema.sh <version> [postgresql|mysql|all]` to run the steps above.
+- Examples:
+  - `scripts/export_schema.sh 1.22.0 postgresql`
+  - `scripts/export_schema.sh 1.22.0 mysql`
+  - `scripts/export_schema.sh 1.22.0 all`
+- Logs are saved to `/tmp/adk_api_<version>_<db>.log` when troubleshooting startup issues.
 
 ## Notes
 - Keep the list of tracked versions in README.md up to date.
