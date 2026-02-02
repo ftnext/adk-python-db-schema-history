@@ -13,13 +13,18 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
 - Output is stored under `schemas/v<version>/` as:
   - `postgresql.sql` exported by `psqldef`
   - `mysql.sql` exported by `mysqldef`
+## MySQL gotchas
+- Use a dedicated database (e.g. `adk`). Do not use `mysql` system DB; it can reject access (e.g. `mysql.events`).
+- Allow root connections from non-localhost by setting `MYSQL_ROOT_HOST=%` on container startup; otherwise `root@127.0.0.1` may be denied.
+- For v1.19.0+ use `aiomysql` and `greenlet` (async driver requirement).
+- When waiting for MySQL, prefer a real query (`mysql -e "SELECT 1"`) instead of `mysqladmin ping` to ensure authentication is ready.
 
 ## Procedure
 1. Start the database container.
    - PostgreSQL 18:
      - `docker run --name adk-pg -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres:18`
    - MySQL 9:
-     - `docker run --name adk-mysql -e MYSQL_ROOT_PASSWORD=mysecretpassword -p 3306:3306 -d mysql:9`
+     - `docker run --name adk-mysql -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_ROOT_HOST=% -p 3306:3306 -d mysql:9`
 2. (MySQL only) Create the target database.
    - Example:
      - `docker exec adk-mysql mysql -uroot -pmysecretpassword -e "CREATE DATABASE IF NOT EXISTS adk"`
@@ -45,6 +50,8 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
    - Examples:
      - `docker rm -f adk-pg`
      - `docker rm -f adk-mysql`
+   - If port 8000 is still in use:
+     - `lsof -ti :8000` then `kill <pid>`
 
 ## Scripted workflow (recommended)
 - Use `scripts/export_schema.sh <version> [postgresql|mysql|all]` to run the steps above.
