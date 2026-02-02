@@ -15,20 +15,31 @@ version_ge() {
   [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
 }
 
+free_port_8000() {
+  local pids=""
+  pids="$(lsof -ti :8000 2>/dev/null || true)"
+  if [ -z "$pids" ]; then
+    return 0
+  fi
+  kill $pids >/dev/null 2>&1 || true
+  for _ in {1..10}; do
+    if ! lsof -ti :8000 >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  pids="$(lsof -ti :8000 2>/dev/null || true)"
+  if [ -n "$pids" ]; then
+    kill -9 $pids >/dev/null 2>&1 || true
+  fi
+}
+
 cleanup() {
   if [ -n "$current_pidfile" ] && [ -f "$current_pidfile" ]; then
     api_pid="$(cat "$current_pidfile")"
     kill "$api_pid" >/dev/null 2>&1 || true
-    for _ in {1..10}; do
-      if ! lsof -ti :8000 >/dev/null 2>&1; then
-        break
-      fi
-      sleep 1
-    done
-    if lsof -ti :8000 >/dev/null 2>&1; then
-      kill -9 "$api_pid" >/dev/null 2>&1 || true
-    fi
   fi
+  free_port_8000
   if [ -n "$current_container" ]; then
     docker rm -f "$current_container" >/dev/null 2>&1 || true
   fi
@@ -84,7 +95,10 @@ run_one() {
   current_container="$container"
   trap cleanup EXIT
 
-  if lsof -ti :8000 >/tmp/adk_port.pid 2>/dev/null; then
+  if lsof -ti :8000 >/dev/null 2>&1; then
+    free_port_8000
+  fi
+  if lsof -ti :8000 >/dev/null 2>&1; then
     echo "Port 8000 is already in use. Stop the existing API server first." >&2
     exit 1
   fi
