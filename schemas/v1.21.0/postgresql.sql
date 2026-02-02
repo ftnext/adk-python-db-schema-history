@@ -1,0 +1,52 @@
+CREATE TABLE "public"."app_states" (
+    "app_name" character varying(128) NOT NULL,
+    "state" jsonb NOT NULL,
+    "update_time" timestamp NOT NULL,
+    CONSTRAINT app_states_pkey PRIMARY KEY ("app_name")
+);
+
+CREATE TABLE "public"."events" (
+    "id" character varying(128) NOT NULL,
+    "app_name" character varying(128) NOT NULL,
+    "user_id" character varying(128) NOT NULL,
+    "session_id" character varying(128) NOT NULL,
+    "invocation_id" character varying(256) NOT NULL,
+    "author" character varying(256) NOT NULL,
+    "actions" bytea NOT NULL,
+    "long_running_tool_ids_json" text,
+    "branch" character varying(256),
+    "timestamp" timestamp NOT NULL,
+    "content" jsonb,
+    "grounding_metadata" jsonb,
+    "custom_metadata" jsonb,
+    "usage_metadata" jsonb,
+    "citation_metadata" jsonb,
+    "partial" boolean,
+    "turn_complete" boolean,
+    "error_code" character varying(256),
+    "error_message" character varying(1024),
+    "interrupted" boolean,
+    "input_transcription" jsonb,
+    "output_transcription" jsonb,
+    CONSTRAINT events_pkey PRIMARY KEY ("id", "app_name", "user_id", "session_id")
+);
+
+ALTER TABLE ONLY "public"."events" ADD CONSTRAINT "events_app_name_user_id_session_id_fkey" FOREIGN KEY ("app_name", "user_id", "session_id") REFERENCES "public"."sessions" ("app_name", "user_id", "id") ON UPDATE NO ACTION ON DELETE CASCADE;
+
+CREATE TABLE "public"."sessions" (
+    "app_name" character varying(128) NOT NULL,
+    "user_id" character varying(128) NOT NULL,
+    "id" character varying(128) NOT NULL,
+    "state" jsonb NOT NULL,
+    "create_time" timestamp NOT NULL,
+    "update_time" timestamp NOT NULL,
+    CONSTRAINT sessions_pkey PRIMARY KEY ("app_name", "user_id", "id")
+);
+
+CREATE TABLE "public"."user_states" (
+    "app_name" character varying(128) NOT NULL,
+    "user_id" character varying(128) NOT NULL,
+    "state" jsonb NOT NULL,
+    "update_time" timestamp NOT NULL,
+    CONSTRAINT user_states_pkey PRIMARY KEY ("app_name", "user_id")
+);
