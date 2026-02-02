@@ -45,6 +45,8 @@ docker run --name adk-mysql -e MYSQL_ROOT_PASSWORD=mysecretpassword -p 3306:3306
 
 ```bash
 uvx --from google-adk==1.14.0 --with pymysql adk api_server --session_service_uri mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/adk
+# For v1.19.0+ use the async driver instead:
+# uvx --from google-adk==1.22.0 --with aiomysql --with greenlet adk api_server --session_service_uri mysql+aiomysql://root:mysecretpassword@127.0.0.1:3306/adk
 ```
 
 Create session to initialize the database:

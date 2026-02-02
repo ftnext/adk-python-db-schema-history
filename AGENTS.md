@@ -8,7 +8,8 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
 - MySQL runs via Docker image `mysql:9`.
 - DB connection strings:
   - PostgreSQL: `postgresql+psycopg://postgres:mysecretpassword@localhost:5432/postgres`.
-  - MySQL: `mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/adk`.
+  - MySQL (<= 1.17.0): `mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/adk`.
+  - MySQL (>= 1.19.0): `mysql+aiomysql://root:mysecretpassword@127.0.0.1:3306/adk`.
 - Output is stored under `schemas/v<version>/` as:
   - `postgresql.sql` exported by `psqldef`
   - `mysql.sql` exported by `mysqldef`
@@ -28,7 +29,8 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
    - PostgreSQL example:
      - `uvx --from google-adk==1.22.0 --with psycopg --with greenlet adk api_server --session_service_uri postgresql+psycopg://postgres:mysecretpassword@localhost:5432/postgres`
    - MySQL example:
-     - `uvx --from google-adk==1.22.0 --with pymysql adk api_server --session_service_uri mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/adk`
+     - `uvx --from google-adk==1.17.0 --with pymysql adk api_server --session_service_uri mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/adk`
+     - `uvx --from google-adk==1.22.0 --with aiomysql --with greenlet adk api_server --session_service_uri mysql+aiomysql://root:mysecretpassword@127.0.0.1:3306/adk`
 4. Create a session by sending the required POST request to the API server.
    - Endpoint: `POST /apps/my_agent/users/test_user/sessions`
    - Example:

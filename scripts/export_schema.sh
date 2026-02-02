@@ -11,6 +11,10 @@ fi
 current_pidfile=""
 current_container=""
 
+version_ge() {
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
+}
+
 cleanup() {
   if [ -n "$current_pidfile" ] && [ -f "$current_pidfile" ]; then
     kill "$(cat "$current_pidfile")" >/dev/null 2>&1 || true
@@ -47,8 +51,16 @@ run_one() {
       image="mysql:9"
       port="3306"
       mysql_db="adk"
-      dsn="mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/${mysql_db}"
-      driver_flags=(--with pymysql)
+      mysql_driver="pymysql"
+      if version_ge "$version" "1.19.0"; then
+        mysql_driver="aiomysql"
+      fi
+      dsn="mysql+${mysql_driver}://root:mysecretpassword@127.0.0.1:3306/${mysql_db}"
+      if [ "$mysql_driver" = "aiomysql" ]; then
+        driver_flags=(--with "$mysql_driver" --with greenlet)
+      else
+        driver_flags=(--with "$mysql_driver")
+      fi
       output="schemas/v${version}/mysql.sql"
       export_cmd=(mysqldef -h 127.0.0.1 -P 3306 -u root "${mysql_db}" --export)
       ;;
@@ -70,10 +82,10 @@ run_one() {
   if [ "$db_kind" = "postgresql" ] || [ "$db_kind" = "postgres" ]; then
     docker run --name "$container" -e POSTGRES_PASSWORD=mysecretpassword -p "${port}:${port}" -d "$image" >/dev/null
   else
-    docker run --name "$container" -e MYSQL_ROOT_PASSWORD=mysecretpassword -p "${port}:${port}" -d "$image" >/dev/null
+    docker run --name "$container" -e MYSQL_ROOT_PASSWORD=mysecretpassword -e MYSQL_ROOT_HOST=% -p "${port}:${port}" -d "$image" >/dev/null
     ready=0
     for _ in {1..20}; do
-      if docker exec "$container" mysqladmin -uroot -pmysecretpassword ping --silent >/dev/null 2>&1; then
+      if docker exec "$container" mysql -uroot -pmysecretpassword -e "SELECT 1" >/dev/null 2>&1; then
         ready=1
         break
       fi
