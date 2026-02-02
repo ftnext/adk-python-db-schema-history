@@ -44,7 +44,7 @@ docker run --name adk-mysql -e MYSQL_ROOT_PASSWORD=mysecretpassword -p 3306:3306
 ```
 
 ```bash
-uvx --from google-adk==1.14.0 --with pymysql adk api_server --session_service_uri mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/mysql
+uvx --from google-adk==1.14.0 --with pymysql adk api_server --session_service_uri mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/adk
 ```
 
 Create session to initialize the database:
@@ -54,7 +54,7 @@ curl -X POST http://127.0.0.1:8000/apps/my_agent/users/test_user/sessions -H 'Co
 ```
 
 ```bash
-MYSQL_PWD=mysecretpassword mysqldef -h 127.0.0.1 -P 3306 -u root mysql --dry-run < schemas/v1.17.0/mysql.sql
+MYSQL_PWD=mysecretpassword mysqldef -h 127.0.0.1 -P 3306 -u root adk --dry-run < schemas/v1.17.0/mysql.sql
 ```
 
 v1.14.0 -> v1.17.0

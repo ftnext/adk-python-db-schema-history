@@ -46,10 +46,11 @@ run_one() {
       container="adk-mysql"
       image="mysql:9"
       port="3306"
-      dsn="mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/mysql"
+      mysql_db="adk"
+      dsn="mysql+pymysql://root:mysecretpassword@127.0.0.1:3306/${mysql_db}"
       driver_flags=(--with pymysql)
       output="schemas/v${version}/mysql.sql"
-      export_cmd=(mysqldef -h 127.0.0.1 -P 3306 -u root mysql --export)
+      export_cmd=(mysqldef -h 127.0.0.1 -P 3306 -u root "${mysql_db}" --export)
       ;;
     *)
       echo "Unknown database: ${db_kind}" >&2
@@ -70,6 +71,19 @@ run_one() {
     docker run --name "$container" -e POSTGRES_PASSWORD=mysecretpassword -p "${port}:${port}" -d "$image" >/dev/null
   else
     docker run --name "$container" -e MYSQL_ROOT_PASSWORD=mysecretpassword -p "${port}:${port}" -d "$image" >/dev/null
+    ready=0
+    for _ in {1..20}; do
+      if docker exec "$container" mysqladmin -uroot -pmysecretpassword ping --silent >/dev/null 2>&1; then
+        ready=1
+        break
+      fi
+      sleep 2
+    done
+    if [ "$ready" -ne 1 ]; then
+      echo "MySQL did not become ready for v${version}." >&2
+      exit 1
+    fi
+    docker exec "$container" mysql -uroot -pmysecretpassword -e "CREATE DATABASE IF NOT EXISTS ${mysql_db}" >/dev/null
   fi
 
   (cd my_agent && nohup uvx --from google-adk=="${version}" "${driver_flags[@]}" adk api_server --session_service_uri "$dsn" > "$log" 2>&1 & echo $! > "$pidfile")
