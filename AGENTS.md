@@ -62,4 +62,4 @@ These steps are for a coding agent to capture table schema SQL for specific ADK 
 - Logs are saved to `/tmp/adk_api_<version>_<db>.log` when troubleshooting startup issues.
 
 ## Notes
-- Keep the list of tracked versions in README.md up to date.
+- README.md tracks only versions with schema changes. Do not add versions with no schema diff.
