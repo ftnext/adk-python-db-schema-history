@@ -1,3 +1,2 @@
 prefix_rule(pattern=["scripts/export_schema.sh"], decision="allow")
-prefix_rule(pattern=["git", "add"], decision="allow")
-prefix_rule(pattern=["git", "commit"], decision="allow")
+prefix_rule(pattern=["git", ["add", "commit"]], decision="allow")
