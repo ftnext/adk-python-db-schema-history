@@ -3,6 +3,7 @@ set -euo pipefail
 
 version="${1:-}"
 db="${2:-postgresql}"
+ADK_PYTHON="${ADK_PYTHON:-python3.13}"
 if [ -z "$version" ]; then
   echo "Usage: $0 <version> [postgresql|mysql]" >&2
   exit 2
@@ -122,7 +123,7 @@ run_one() {
     docker exec "$container" mysql -uroot -pmysecretpassword -e "CREATE DATABASE IF NOT EXISTS ${mysql_db}" >/dev/null
   fi
 
-  (cd my_agent && nohup uvx --from google-adk=="${version}" "${driver_flags[@]}" adk api_server --session_service_uri "$dsn" > "$log" 2>&1 & echo $! > "$pidfile")
+  (cd my_agent && nohup uvx --python "$ADK_PYTHON" --from google-adk=="${version}" "${driver_flags[@]}" adk api_server --session_service_uri "$dsn" > "$log" 2>&1 & echo $! > "$pidfile")
 
   ok=0
   for _ in {1..20}; do
