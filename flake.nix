@@ -55,7 +55,7 @@
 
             shellHook = ''
               export LIBPQ_DIR="${pkgs.libpq}"
-              export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ pkgs.stdenv.cc.cc.lib ]}:''${LD_LIBRARY_PATH:-}"
+              export LD_LIBRARY_PATH="${pkgs.lib.makeLibraryPath [ pkgs.libpq pkgs.stdenv.cc.cc.lib ]}:''${LD_LIBRARY_PATH:-}"
             '';
           };
         }
