@@ -10,6 +10,8 @@ The current focus includes the following versions, and this list will be updated
     - >Add transcription fields to session events
 - [1.22.0](https://github.com/google/adk-python/releases/tag/v1.22.0)
     - >Introduce new JSON-based database schema for DatabaseSessionService, which will be used for newly-created databases. A migration command and script are provided.
+- [1.28.0](https://github.com/google/adk-python/releases/tag/v1.28.0)
+    - >Add index to events table and update dependencies
 
 Each snapshot captures the table definitions for a specific version so differences can be compared over time.
 Schemas are stored under `schemas/v<version>/` as `postgresql.sql` and `mysql.sql`.
