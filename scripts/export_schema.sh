@@ -64,7 +64,7 @@ run_one() {
       image="postgres:18"
       port="5432"
       dsn="postgresql+psycopg://postgres:mysecretpassword@localhost:5432/postgres"
-      driver_flags=(--with psycopg --with greenlet)
+      driver_flags=(--with 'psycopg[binary]' --with greenlet --with sqlalchemy)
       output="schemas/v${version}/postgresql.sql"
       export_cmd=(psqldef -h localhost -p 5432 -U postgres -W mysecretpassword postgres --export)
       ;;
@@ -74,14 +74,16 @@ run_one() {
       port="3306"
       mysql_db="adk"
       mysql_driver="pymysql"
+      mysql_package="pymysql"
       if version_ge "$version" "1.19.0"; then
-        mysql_driver="aiomysql"
+        mysql_driver="aiomysql==0.2.0"
+        mysql_package="aiomysql==0.2.0"
       fi
-      dsn="mysql+${mysql_driver}://root:mysecretpassword@127.0.0.1:3306/${mysql_db}"
-      if [ "$mysql_driver" = "aiomysql" ]; then
-        driver_flags=(--with "$mysql_driver" --with greenlet)
+      dsn="mysql+${mysql_driver%%==*}://root:mysecretpassword@127.0.0.1:3306/${mysql_db}"
+      if [[ "$mysql_driver" == aiomysql* ]]; then
+        driver_flags=(--with "$mysql_package" --with pymysql==1.0.3 --with greenlet --with sqlalchemy)
       else
-        driver_flags=(--with "$mysql_driver")
+        driver_flags=(--with "$mysql_package" --with sqlalchemy)
       fi
       output="schemas/v${version}/mysql.sql"
       export_cmd=(mysqldef -h 127.0.0.1 -P 3306 -u root "${mysql_db}" --export)
