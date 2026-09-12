@@ -1,0 +1,43 @@
+CREATE TABLE `adk_internal_metadata` (
+  `key` varchar(128) NOT NULL,
+  `value` varchar(256) NOT NULL,
+  PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `app_states` (
+  `app_name` varchar(128) NOT NULL,
+  `state` longtext NOT NULL,
+  `update_time` datetime(6) NOT NULL,
+  PRIMARY KEY (`app_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `events` (
+  `id` varchar(128) NOT NULL,
+  `app_name` varchar(128) NOT NULL,
+  `user_id` varchar(128) NOT NULL,
+  `session_id` varchar(128) NOT NULL,
+  `invocation_id` varchar(256) NOT NULL,
+  `timestamp` datetime(6) NOT NULL,
+  `event_data` longtext,
+  PRIMARY KEY (`id`,`app_name`,`user_id`,`session_id`),
+  KEY `idx_events_app_user_session_ts` (`app_name`,`user_id`,`session_id`,`timestamp` DESC),
+  CONSTRAINT `events_ibfk_1` FOREIGN KEY (`app_name`, `user_id`, `session_id`) REFERENCES `sessions` (`app_name`, `user_id`, `id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `sessions` (
+  `app_name` varchar(128) NOT NULL,
+  `user_id` varchar(128) NOT NULL,
+  `id` varchar(128) NOT NULL,
+  `state` longtext NOT NULL,
+  `create_time` datetime(6) NOT NULL,
+  `update_time` datetime(6) NOT NULL,
+  PRIMARY KEY (`app_name`,`user_id`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `user_states` (
+  `app_name` varchar(128) NOT NULL,
+  `user_id` varchar(128) NOT NULL,
+  `state` longtext NOT NULL,
+  `update_time` datetime(6) NOT NULL,
+  PRIMARY KEY (`app_name`,`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
