@@ -12,6 +12,9 @@ The current focus includes the following versions, and this list will be updated
     - >Introduce new JSON-based database schema for DatabaseSessionService, which will be used for newly-created databases. A migration command and script are provided.
 - [1.28.0](https://github.com/google/adk-python/releases/tag/v1.28.0)
     - >Add index to events table and update dependencies
+- [2.10.0](https://github.com/google/adk-python/releases/tag/v2.10.0)
+    - PostgreSQL and MySQL now use `idx_events_app_user_session_ts_id` on `events` in fresh databases. It adds `id DESC` after `timestamp DESC` to break ties when fetching recent events.
+    - On existing databases, `DatabaseSessionService.prepare_tables()` creates the new index if needed and retains the old `idx_events_app_user_session_ts` index. [ADK commit `cd6dee0`](https://github.com/google/adk-python/commit/cd6dee0503f5d5495125e5b023e64230f8da4b7b)
 
 Each snapshot captures the table definitions for a specific version so differences can be compared over time.
 Schemas are stored under `schemas/v<version>/` as `postgresql.sql` and `mysql.sql`.
