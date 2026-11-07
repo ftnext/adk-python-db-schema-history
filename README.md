@@ -15,6 +15,10 @@ The current focus includes the following versions, and this list will be updated
 - [2.10.0](https://github.com/google/adk-python/releases/tag/v2.10.0)
     - PostgreSQL and MySQL now use `idx_events_app_user_session_ts_id` on `events` in fresh databases. It adds `id DESC` after `timestamp DESC` to break ties when fetching recent events.
     - On existing databases, `DatabaseSessionService.prepare_tables()` creates the new index if needed and retains the old `idx_events_app_user_session_ts` index. [ADK commit `cd6dee0`](https://github.com/google/adk-python/commit/cd6dee0503f5d5495125e5b023e64230f8da4b7b)
+- [2.14.0](https://github.com/google/adk-python/releases/tag/v2.14.0)
+    - Fresh PostgreSQL databases now use `json` instead of `jsonb` for `app_states.state`, `sessions.state`, `user_states.state`, and `events.event_data`. MySQL schemas are unchanged from 2.13.0.
+    - `DynamicJSON` switches to `postgresql.JSON()` to preserve key order and floating-point representations and allow NUL characters in strings. [ADK commit `d487c53`](https://github.com/google/adk-python/commit/d487c537774278a98d5970b67c03a10049af2786) ([PR #7857](https://github.com/google/adk-python/pull/7857))
+    - Existing `jsonb` columns remain unchanged and continue to support ADK reads and writes. The [PostgreSQL sample README](https://github.com/google/adk-python/blob/v2.14.0/contributing/samples/context_management/postgres_session_service/README.md#state-management) documents manual conversion to `json`; queries using `jsonb`-only operators or GIN indexes need review when switching column types.
 
 Each snapshot captures the table definitions for a specific version so differences can be compared over time.
 Schemas are stored under `schemas/v<version>/` as `postgresql.sql` and `mysql.sql`.
