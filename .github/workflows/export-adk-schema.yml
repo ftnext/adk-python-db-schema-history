@@ -50,9 +50,8 @@ jobs:
           previous_version="$(
             find schemas -maxdepth 1 -type d -name 'v[0-9]*.[0-9]*.[0-9]*' \
               | sed 's#schemas/v##' \
-              | grep -v "^${ADK_VERSION}$" \
               | sort -V \
-              | awk -v target="$ADK_VERSION" '$0 < target { previous = $0 } END { print previous }'
+              | awk -v target="$ADK_VERSION" '$0 == target { print previous } { previous = $0 }'
           )"
 
           {
